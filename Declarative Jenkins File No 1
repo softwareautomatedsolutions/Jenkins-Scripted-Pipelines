@@ -1,0 +1,67 @@
+pipeline{
+  agent any  
+  tools {
+    maven 'maven3.9.4'
+  }
+  //options {}  
+  //triggers {}
+  stages{
+    stage('1clone'){
+      steps{
+        sh "echo ready to automate build or cloning the latest application version"
+        git 'https://github.com/LandmakTechnology/maven-web-application'
+        sh "echo latest application version collected from SCM"
+      }   
+    }
+    stage('2.mvnBuild'){
+      steps{
+        sh "echo 'build process starts and JUnit-test-cases' "
+        sh "echo 'testing must pass to create artifacts'"
+        sh "mvn clean package"
+        sh "echo build process ends"
+      }
+    }
+
+    stage('3.CodeQuality'){
+      steps{
+        sh "echo CodeQuality review  starts "
+        sh "mvn sonar:sonar"
+        sh "echo CodeQuality review ends"
+      }
+    }      
+    stage('4.UploadArtifacts'){
+      steps{
+        sh "mvn deploy"
+        sh "echo build and release job completed successfully"
+      }     
+    }
+    stage('5.Deploy2UAT'){
+      steps{
+        deploy adapters: [tomcat9(credentialsId: 'tomcat-credentials', path: '', url: 'http://54.166.85.32:8177/')], contextPath: null, war: 'target/*war'
+        sh "echo deployment to production completed successfully"
+      }       
+    }
+  }
+  post{
+    failure{
+         emailext body: '''Hi Team,
+Build failed
+Software Automated Solutions''', recipientProviders: [developers(), contributor()], subject: 'build status', to: 'developers'
+
+    }
+    success{
+         emailext body: '''Hi Team,
+Build succeeded
+Software Automated Solutions''', recipientProviders: [developers(), contributor()], subject: 'build status', to: 'developers'
+
+    }
+    always{
+         emailext body: '''Hi Team,
+Build status
+Software Automated Solutions''', recipientProviders: [developers(), contributor()], subject: 'build status', to: 'developers'
+
+    }
+  }
+
+}
+
