@@ -1,0 +1,77 @@
+node{
+        def mavenHome = tool name: 'maven3.9.4'
+        stage('1.CloneCode'){
+        //Jenkins running on a Linux system
+        https://github.com/SASTapong/maven-web-application.git
+        //If Jenkins is running on a windows system the command will start with
+        //bat "git clone https://github.com/SASTapong/maven-web-application.git "  
+        }
+        stage('2.mvnBuild'){
+               sh "${mavenHome}/bin/mvn clean package"
+      }
+      /*
+      stage('3.CodeQuality'){
+        //sh "${mavenHome}/bin/mvn sonar:sonar"
+        //edit pom.xml propertiesTAG with SonarQube server details
+      }
+      stage('4.UploadArtifacts'){
+        sh "${mavenHome}/bin/mvn deploy"
+        //edit pom.xml distributionManagement TAG with repository details
+        //edit settings.xml with nexus-user login credentials       
+    }
+    stage('5.Deploy2UAT'){
+         //Before we deploy we have to send it to a User Acceptance Testing environment which is the clients testing server
+         //In this environment we are going to test the application then if we like the app
+         //We are going to do manual approval
+         //use deploy-to-container plugin via pipeline syntax located at dashboard, configure, pipeline, pipeline syntax,
+         // make sure you check use Groovy Sandbox
+         // In the pipeline syntax under Steps, click on Sample step, select deploy: Deploy war/ear to a container
+         // Then in the deploy box for WAR/EAR Files write target/*war
+         // Leave the Context path as is
+         // Then under Container select Tomcat 9.x Remote, the scroll down to credentials and select Tomcat credentials
+         // Then enter the Tomcat server URL
+         deploy adapters: [tomcat9(credentialsId: 'tomcat-credentials', path: '', url: 'http://34.219.51.216:8177/')], contextPath: null, war: 'target/*war'
+         //Deploying [/var/lib/jenkins/workspace/tesla-app-pipeline/target/tesla.war]
+    }
+     
+    stage('6.6ManualApproval'){
+        sh "echo 'Please review the application performance' "
+        timeout(time:600, unit:'MINUTES') {
+        // in the above step we could change the time:600 to 3 and the unit: Minutes to unit: Day, meaning that the timeout is 3days
+        input message: 'Application ready for deployment, Please review and approve'
+        // At this point Senior Management has to review the application with the Clients Business Analyst
+        // If the client likes the application they will sign documents to approve
+        // Then click on Proceed or if not desired click on Abort
+      }       
+    }
+    stage('7.Deploy2Prod'){
+      sh "echo 'Deploy application to the customers/production' "
+      deploy adapters: [tomcat9(credentialsId: 'tomcat-credentials', path: '', url: 'http://34.219.51.216:8177/')], contextPath: null, war: 'target/*war'
+    }
+    stage('8.APM'){
+        // This stage involves Application Performance Monitoring(APM),  observation and alerting tools
+        sh "echo 'monitoring and observation and alerting' "
+        sh "echo 'application performance Monitoring in progress' "
+    }
+    stage('9.emailNotification'){
+        // to configure email notification go to the job, then Click on Pipeline Syntax
+        // Then under Sample Steps select emailext: Extended Email
+        // Then in the Emailext To box type the entire email address of the desire team member
+        // Then Click on Add and select Build User, Then click on Add and select contributor, click on add and select developers, select requestor etc
+        // Then under Subject write Build and deployment status
+        // Then in the Body write Hi Team, The build and deployment status for tesla-app follows. Regards Software Automated Solutions
+        // Then click on Generate Pipeline Syntax
+        // Then highlight and copy the syntax and paste it in your script
+        sh "echo 'notify the team for unusual accurances' "
+        sh "echo 'notify the team if the applications are down' "
+        sh "echo 'notify the team if the latency is higher that expected' "
+        emailext body: '''Hi Team,
+
+        The build and Deployment status for tesla-app follows.
+
+        Regards,
+        Software Automated Solutions''', recipientProviders: [buildUser(), contributor(), developers(), requestor()], subject: 'build and deployment status', to:     'sas1@gmail.com'
+
+*/
+    }
+}
